@@ -79,18 +79,31 @@ def computeIK(x, y, z, l1=constL1, l2=constL2, l3=constL3):
 
     theta3 = alkashi(l2, l3, d) + math.pi
 
+    lenght = math.sqrt((0-x)**2 + (0-y)**2 + (0-z)**2)
+
+    max_lenght = l1 + l2 + l3
+
+    if lenght > max_lenght :
+        print("position inateignable")
+
     return [theta1, -theta2, -theta3]   #gérer position inateignables + sense du coude + infinité de positions 
 
-def alkashi (a,b,c):
+def alkashi (a,b,c, elbowup=False):
     test = (a**2 + b**2 - c**2) / (2*a*b)
-    print(test)
+
     if test > 1:
         test = 1
 
     if test <-1:
         test = -1
 
-    return(math.acos(test))
+    if elbowup:
+        print('yes')
+        return math.acos(test)
+    
+    else :
+        print('no')
+        return -math.acos(test)
 
 def main():
     
