@@ -1,4 +1,4 @@
-from math import pi,cos, sin, radians
+from math import pi,cos, sin, radians, sqrt, acos, degrees
 from constants import *
 # Dimensions used for the PhantomX robot :
 # constL1 = 54.8
@@ -9,6 +9,8 @@ theta2Correction = 0  # A completer
 theta3Correction = 0  # A completer
 offsetP2 = radians(16)
 offsetP3 = radians(43.76)
+
+state = 0
 
 # Dimensions used for the simple arm simulation
 # bx = 0.07
@@ -88,7 +90,7 @@ def computeIK(x, y, z, l1=constL1, l2=constL2, l3=constL3):
 
     return [theta1, -theta2, -theta3]   #gérer position inateignables + sense du coude + infinité de positions 
 
-def alkashi (a,b,c, elbowup=False):
+def alkashi (a,b,c, elbowup=True):
     test = (a**2 + b**2 - c**2) / (2*a*b)
 
     if test > 1:
@@ -98,12 +100,53 @@ def alkashi (a,b,c, elbowup=False):
         test = -1
 
     if elbowup:
-        print('yes')
         return math.acos(test)
     
     else :
-        print('no')
         return -math.acos(test)
+    
+def circle(x, z, r, t, duration):
+    angle = ((t * 2 * pi) / duration)
+    dy = cos(angle) * r            
+    dz = (sin(angle) * r) +z
+    return computeIK(x, dy, dz)
+
+def triangle(x, z, h, w, t):
+    global state 
+    
+    pts = triangle_points(x,z, h, w)
+    
+    if state == 0 or round(dx,2)==pts[0][0] and round(dy,2)==pts[0][1] and round(dz,2)==pts[0][2]:
+        dx, dy, dz = segment(pts[0][0],pts[0][1],pts[0][2],pts[1][0],pts[1][1],pts[1][2], t ,3)
+    if state == 1 or round(dx,2)==pts[1][0] and round(dy,2)==pts[1][1] and round(dz,2)==pts[1][2]:
+        state = 1
+        dx, dy, dz = segment(pts[1][0],pts[1][1],pts[1][2],pts[2][0],pts[2][1],pts[2][2], t ,3)
+    if state == 2 or round(dx,2)==pts[2][0] and round(dy,2)==pts[2][1] and round(dz,2)==pts[2][2]:
+        state = 2 
+        dx, dy, dz = segment(pts[2][0],pts[2][1],pts[2][2],pts[0][0],pts[0][1],pts[0][2], t ,3) 
+    print(round(dz,2))
+    print(pts[1][2])
+
+    return (dx, dy, dz)
+
+
+def segment(x1, y1, z1,x2, y2, z2, t, duration):
+    x = t%duration * (x2-x1) + x1
+    y = t%duration * (y2-y1) + y1
+    z = t%duration * (z2-z1) + z1
+    # print(x)
+    # print(y)
+    # print(z)
+    # print('\n')
+    return computeIK(x, y, z)
+
+def triangle_points(x,z,h,w):
+    coo_de_depart = [x,w*1/2,z]
+    coo_de_hyp = [x,0, z+h]
+    coo_de_fin = [x,-w*1/2,z]
+    return [coo_de_depart, coo_de_hyp, coo_de_fin]
+
+    
 
 def main():
     

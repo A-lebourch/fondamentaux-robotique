@@ -120,7 +120,7 @@ while True:
                 "motor2": -alphas[1],
                 "motor3": alphas[2],
             }
-            pos = kinematics.computeDK(alphas[0], alphas[1], alphas[2])
+            pos = kinematics.computeDKsimple(alphas[0], alphas[1], alphas[2])
             pos[0] += bx
             pos[2] += bz
             sim.addDebugPosition(pos, duration=3)
@@ -137,7 +137,7 @@ while True:
                 "motor2": -alphas[1],
                 "motor3": alphas[2],
             }
-            pos = kinematics.computeDK(alphas[0], alphas[1], alphas[2])
+            pos = kinematics.computeDKsimple(alphas[0], alphas[1], alphas[2])
             pos[0] += bx
             pos[2] += bz
             sim.addDebugPosition(pos, duration=3)
