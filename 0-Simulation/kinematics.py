@@ -16,6 +16,8 @@ offsetP3 = radians(43.76)
 # constL1 = 0.085
 # constL2 = 0.185
 # constL3 = 0.250
+def computeDKDetailed(theta1,theta2,theta3):
+    pass
 
 def computeDK(theta1, theta2, theta3, l1=constL1, l2=constL2, l3=constL3):
     # theta1 = radians(theta1)
@@ -109,18 +111,23 @@ def circle(x, z, r, t, duration):
     dz = (sin(angle) * r) +z
     return computeIK(x, dy, dz)
 
-def triangle(x, z, h, w, t):
+def triangle(x, z, h, w, t, duration):
     
     pts = triangle_points(x,z, h, w)
     
-    if round(t%3/3,3) <= 0.333:
-        dx, dy, dz = segment(pts[0][0],pts[0][1],pts[0][2],pts[1][0],pts[1][1],pts[1][2], t ,1)
-    if 0.333 < round(t%3/3,3) <= 0.666:
-        dx, dy, dz = segment(pts[1][0],pts[1][1],pts[1][2],pts[2][0],pts[2][1],pts[2][2], t ,1)
-    if 0.666 < round(t%3/3,3) <= 1:
-        dx, dy, dz = segment(pts[2][0],pts[2][1],pts[2][2],pts[0][0],pts[0][1],pts[0][2], t ,1) 
+    t = t%duration
+
+    if t <= duration/3:
+        theta1,theta2,theta3 = segment(pts[0][0],pts[0][1],pts[0][2],pts[1][0],pts[1][1],pts[1][2], t ,duration * 1/3)
+        print(f'premier t  = {t}')
+    elif t <= 2*duration/3:
+        theta1,theta2,theta3 = segment(pts[1][0],pts[1][1],pts[1][2],pts[2][0],pts[2][1],pts[2][2], t-duration/3,duration * 1/3)
+        print(f'second t  = {t}')
+    else :
+        theta1,theta2,theta3 = segment(pts[2][0],pts[2][1],pts[2][2],pts[0][0],pts[0][1],pts[0][2], t-2*duration/3 ,duration * 1/3) 
+        print(f'troisième t  = {t}')
    
-    return (dx, dy, dz)
+    return (theta1,theta2,theta3)
 
 
 def segment(x1, y1, z1,x2, y2, z2, t, duration):
