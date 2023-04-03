@@ -117,27 +117,39 @@ def triangle(x, z, h, w, t):
     pts = triangle_points(x,z, h, w)
     
     if state == 0 or round(dx,2)==pts[0][0] and round(dy,2)==pts[0][1] and round(dz,2)==pts[0][2]:
-        dx, dy, dz = segment(pts[0][0],pts[0][1],pts[0][2],pts[1][0],pts[1][1],pts[1][2], t ,3)
+        dx, dy, dz = segment(pts[0][0],pts[0][1],pts[0][2],pts[1][0],pts[1][1],pts[1][2], t ,4)
     if state == 1 or round(dx,2)==pts[1][0] and round(dy,2)==pts[1][1] and round(dz,2)==pts[1][2]:
         state = 1
-        dx, dy, dz = segment(pts[1][0],pts[1][1],pts[1][2],pts[2][0],pts[2][1],pts[2][2], t ,3)
+        dx, dy, dz = segment(pts[1][0],pts[1][1],pts[1][2],pts[2][0],pts[2][1],pts[2][2], t ,4)
     if state == 2 or round(dx,2)==pts[2][0] and round(dy,2)==pts[2][1] and round(dz,2)==pts[2][2]:
         state = 2 
-        dx, dy, dz = segment(pts[2][0],pts[2][1],pts[2][2],pts[0][0],pts[0][1],pts[0][2], t ,3) 
-    print(round(dz,2))
+        dx, dy, dz = segment(pts[2][0],pts[2][1],pts[2][2],pts[0][0],pts[0][1],pts[0][2], t ,4) 
+
+    print("\ndx:")
+    print(round(dx,2))
+    print(round(pts[1][1],2))
+    print("\ndy:")
+    print(dy)
+    print(pts[1][0])
+    print("\ndz:")
+    print(dz)
     print(pts[1][2])
 
     return (dx, dy, dz)
 
 
 def segment(x1, y1, z1,x2, y2, z2, t, duration):
-    x = t%duration * (x2-x1) + x1
-    y = t%duration * (y2-y1) + y1
-    z = t%duration * (z2-z1) + z1
-    # print(x)
-    # print(y)
-    # print(z)
-    # print('\n')
+    # if t/duration > 1:
+    #     return computeIK(x2, y2, z2)
+    # else:
+    #     x = t/duration * (x2-x1) + x1
+    #     y = t/duration * (y2-y1) + y1
+    #     z = t/duration * (z2-z1) + z1
+    #     return computeIK(x, y, z)
+
+    x = t%duration/3 * (x2-x1) + x1
+    y = t%duration/3 * (y2-y1) + y1
+    z = -t%duration/3 * (z2-z1) + z1
     return computeIK(x, y, z)
 
 def triangle_points(x,z,h,w):
