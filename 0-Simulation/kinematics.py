@@ -187,8 +187,14 @@ def computeIK(
 # but whose (0,0) point is leg dependent, ie will match the leg's initial position.
 # Given the destination point (x, y, z) of a limb with 3 rotational axes separated by the distances (l1, l2, l3),
 # returns the angles to apply to the 3 axes
-def computeIKOriented(x, y, z, legID, params, extra_theta=0, verbose=False):
-    print("computeIKOriented not implemented yet")
+def computeIKOriented(x, y, z, legID):
+    x = x+ 0.150
+    z = z- 0.150
+
+    test = rotation_2D(x,y,z,LEG_ANGLES[legID])
+    return computeIK(test[0],test[1],test[2])
+
+    
 
 
 def computeIKOrientedSimple(x, y, z, legID, extra_theta=0, verbose=False):
@@ -248,7 +254,7 @@ def trianglePoints(x, z, h, w):
     return [[x, 0, h + z], [x, -w / 2, z], [x, w / 2, z]]
 
 
-def triangle(x, z, h, w, t):
+def triangle(x, z, h, w, t, leg_angle, sens= False):
     """
     Takes the geometric parameters of the triangle and the current time, gives the joint angles to draw the triangle with the tip of th leg. Format : [theta1, theta2, theta3]
     """
@@ -262,8 +268,13 @@ def triangle(x, z, h, w, t):
     # Interpolation entre les deux points
     T = math.fmod(t, 1)
     pos = P2 * T + (1 - T) * P1
+    if sens == True :
+        test = rotation_2D(pos[0],pos[1],pos[2], math.pi + leg_angle)
+    if sens == False:
+        test = rotation_2D(pos[0],pos[1],pos[2], leg_angle)
+    return computeIK(test[0],test[1],test[2])
 
-    return computeIK(pos[0], pos[1], pos[2])
+
 
 
 def circlePoints(x, z, r, N=16):
