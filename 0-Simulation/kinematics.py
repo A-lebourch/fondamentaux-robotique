@@ -96,6 +96,7 @@ def computeDKDetailed(
     theta3 = (THETA3_MOTOR_SIGN * theta3 - theta3Correction) * angle_unit
 
     # TODO: terminer cette fonction
+
     p0 = [0,0,0]
     p1 = computeDKP1(theta1_verif,theta2_verif,theta3_verif,l1,l2,l3)
     p2 = computeDKP2(theta1_verif,theta2_verif,theta3_verif,l1,l2,l3)
@@ -187,11 +188,12 @@ def computeIK(
 # but whose (0,0) point is leg dependent, ie will match the leg's initial position.
 # Given the destination point (x, y, z) of a limb with 3 rotational axes separated by the distances (l1, l2, l3),
 # returns the angles to apply to the 3 axes
-def computeIKOriented(x, y, z, legID):
-    x = x+ 0.150
-    z = z- 0.150
-
-    test = rotation_2D(x,y,z,LEG_ANGLES[legID])
+def computeIKOriented(x, y, z, legID, direction):
+    test = rotation_2D(x,y,z,-LEG_ANGLES[legID] + direction)
+    test[0] += 0.175
+    test[2] -= 0.050
+    
+    # return computeIK(0.150,0,-0.05)
     return computeIK(test[0],test[1],test[2])
 
     
@@ -254,7 +256,7 @@ def trianglePoints(x, z, h, w):
     return [[x, 0, h + z], [x, -w / 2, z], [x, w / 2, z]]
 
 
-def triangle(x, z, h, w, t, leg_angle, sens= False):
+def triangle(x, z, h, w, t, leg_id, direction):
     """
     Takes the geometric parameters of the triangle and the current time, gives the joint angles to draw the triangle with the tip of th leg. Format : [theta1, theta2, theta3]
     """
@@ -268,13 +270,45 @@ def triangle(x, z, h, w, t, leg_angle, sens= False):
     # Interpolation entre les deux points
     T = math.fmod(t, 1)
     pos = P2 * T + (1 - T) * P1
-    if sens == True :
-        test = rotation_2D(pos[0],pos[1],pos[2], math.pi + leg_angle)
-    if sens == False:
-        test = rotation_2D(pos[0],pos[1],pos[2], leg_angle)
-    return computeIK(test[0],test[1],test[2])
+
+    # return computeIKOriented(0,0,0, leg_id) 
+    return computeIKOriented(pos[0],pos[1],pos[2], leg_id, direction) 
 
 
+def triangle(x, z, h, w, duration, t, leg_id, direction):
+    """
+    Takes the geometric parameters of the triangle and the current time, gives the joint angles to draw the triangle with the tip of th leg. Format : [theta1, theta2, theta3]
+    """
+
+    points = trianglePoints(x, z, h, w)
+
+    # Sélection de deux points
+    
+    t= t%duration
+    
+
+    if t <= duration/2 :
+        P1 = np.array(points[1])
+        P2 = np.array(points[2])
+        percent = t / (duration/2)
+
+    elif t <= 3*duration/4 :
+        P1 = np.array(points[2])
+        P2 = np.array(points[0])
+        percent = (t - (duration/2))/(duration/4)
+
+    else :
+        P1 = np.array(points[0])
+        P2 = np.array(points[1])
+        # percent = (t - (3*duration/4))/(duration/4)
+        percent = (t - (duration/2))/(duration/4)
+
+    # Interpolation entre les deux points
+    T = math.fmod(percent, 1)
+    pos = P2 * T + (1 - T) * P1
+
+    # return computeIKOriented(0,0,0, leg_id) 
+    return computeIKOriented(pos[0],pos[1],pos[2], leg_id, direction) 
 
 
 def circlePoints(x, z, r, N=16):
@@ -301,7 +335,6 @@ def circle(x, z, r, t, duration):
     """
     Takes the geometric parameters of the circle and the current time, gives the joint angles to draw the circle with the tip of th leg. Format : [theta1, theta2, theta3]
     """
-
     N = 16
     points = circlePoints(x, z, r, N)
 
